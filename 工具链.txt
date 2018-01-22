@@ -1,0 +1,5 @@
+0. 生成光照路径 python    GET
+1. lighthouse 生成rgb图像 C++ （高动态范围图像如何呈现？）
+	1.0 改变为命令行方式
+	
+2. 截取小块 python（需要mask等）

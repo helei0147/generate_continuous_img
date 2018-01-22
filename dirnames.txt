@@ -1,0 +1,3 @@
+D:\brdf_render\MERL_BRDF
+normals\
+Results
