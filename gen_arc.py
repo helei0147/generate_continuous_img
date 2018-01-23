@@ -37,15 +37,13 @@ def gen_arc():
     y_steps = steps*y_range/(LIGHT_NUMBER-1)
     x = x1+x_steps
     y = y1+y_steps
-    m = np.arange(-1,1,0.001)
-    n1 = np.sqrt(1-m*m)
-    n2 = -n1
-    plt.plot(x,y,m,n1,m,n2);
     z = -np.sqrt(1-x*x-y*y)
     x = np.reshape(x, [LIGHT_NUMBER, 1])
     y = np.reshape(y, [LIGHT_NUMBER, 1])
     z = np.reshape(z, [LIGHT_NUMBER, 1])
     lights = np.concatenate((x,y,z),axis=1)
+    
+    display_lights(lights)
     return lights
     
 def output(file, lights):
@@ -54,7 +52,18 @@ def output(file, lights):
         file.write('%f %f %f '%(lights[i, 0], lights[i, 1], lights[i, 2]))
     file.close()
     
+def display_lights(lights, filename = 'light_timg.png'):
+    x = lights[:,0]
+    y = lights[:,1]
+    m = np.arange(-1,1,0.001)
+    n1 = np.sqrt(1-m*m)
+    n2 = -n1
+    plt.figure(figsize=(6,6))
+    plt.plot(-x,-y,m,n1,m,n2);
+    plt.savefig(filename)
+    
 if __name__ == "__main__":
     lights = gen_arc()
     f = open('lights.txt','w')
     output(f, lights)
+    f.close()
