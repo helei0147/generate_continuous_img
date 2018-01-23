@@ -10,12 +10,12 @@ def read_patch(model_index, material_index):
     mask = mask>0
     transed_mask = np.transpose(mask, [1,0])
     [height, width] = mask.shape
-    channels = np.ndarray([height,width,3], dtype = np.float32)
-    transed_channels = np.ndarray([width, height,3], dtype = np.float32)
-    gs_canvas = np.ndarray([height, width], dtype = np.float32)
+    channels = np.zeros([height,width,3], dtype = np.float32)
+    transed_channels = np.zeros([width, height,3], dtype = np.float32)
+    gs_canvas = np.zeros([height, width], dtype = np.float32)
     folder_name = 'temp/%d_%d/' % (material_index, model_index)
     file_num = len(os.listdir(folder_name))
-    patch_buffer = np.ndarray([height, width, file_num])
+    patch_buffer = np.zeros([height, width, file_num])
     for i in range(file_num): # for each rgb file, read, please.
         filename = folder_name+str(i)+'.rgb'
         rgb = np.fromfile(filename, dtype = np.float32, count = -1);
@@ -26,6 +26,7 @@ def read_patch(model_index, material_index):
         gs_canvas = channels[:,:,0]*0.2989 + channels[:,:,1]*0.5870 + channels[:,:,2]*0.1140
         patch_buffer[:,:,i] = gs_canvas
     count_nan(patch_buffer)
+    save_block(patch_buffer, 'temp.png')
     # read patch pos
     a = np.load('pos_buffer/'+str(model_index)+'.npy')
     pos_num = a.shape[0]
@@ -38,7 +39,7 @@ def read_patch(model_index, material_index):
         nonzero_pix_num = np.count_nonzero(cropped>0)
         valid_percent = np.sum(nonzero_pix_num)/(dep*w*h)
         if valid_percent>0.8:
-            ##### save_block(cropped, str(i)+'.png')
+            save_block(cropped, str(i)+'.png')
             block_buffer.append(cropped)
             info_buffer.append([model_index, i])
     block_buffer = np.array(block_buffer)
@@ -53,11 +54,15 @@ def count_nan(matrix):
         print('nan occurs, nan count is %d'%(nan_count))
 def save_block(blocks, pic_name):
     [h,w,d] = blocks.shape
-    canvas = np.ndarray([h, w*d], dtype = np.float32)
+    canvas = np.zeros([h, w*d], dtype = np.float32)
     for i in range(d):
         canvas[:,i*w:i*w+w] = blocks[:,:,i]
     med = np.median(canvas)
-    threshold = med*2
+    if med>0:
+        threshold = med*5
+    else:
+        threshold = 0.14
+    print('threshold:', threshold)
     canvas[canvas>threshold] = threshold
     canvas = canvas/threshold*255
     canvas = canvas.astype(np.uint8)
