@@ -19,11 +19,13 @@ def read_patch(model_index, material_index):
     for i in range(file_num): # for each rgb file, read, please.
         filename = folder_name+str(i)+'.rgb'
         rgb = np.fromfile(filename, dtype = np.float32, count = -1);
+        count_nan(rgb)
         transed_channels[transed_mask] = np.reshape(rgb,[-1,3])
         channels = np.transpose(transed_channels, [1,0,2])
         # new_value = 0.2989 * R + 0.5870 * G + 0.1140 * B
         gs_canvas = channels[:,:,0]*0.2989 + channels[:,:,1]*0.5870 + channels[:,:,2]*0.1140
         patch_buffer[:,:,i] = gs_canvas
+    count_nan(patch_buffer)
     # read patch pos
     a = np.load('pos_buffer/'+str(model_index)+'.npy')
     pos_num = a.shape[0]
@@ -35,17 +37,20 @@ def read_patch(model_index, material_index):
         cropped = patch_buffer[top:bottom, left:right, :]
         nonzero_pix_num = np.count_nonzero(cropped>0)
         valid_percent = np.sum(nonzero_pix_num)/(dep*w*h)
-        
         if valid_percent>0.8:
             ##### save_block(cropped, str(i)+'.png')
             block_buffer.append(cropped)
             info_buffer.append([model_index, i])
     block_buffer = np.array(block_buffer)
+    count_nan(block_buffer)
     info_buffer = np.array(info_buffer)
     print('block_buffer shape')
     print(block_buffer.shape)
     return block_buffer, info_buffer
-
+def count_nan(matrix):
+    nan_count = np.count_nonzero(np.isnan(matrix))
+    if nan_count>0:
+        print('nan occurs, nan count is %d'%(nan_count))
 def save_block(blocks, pic_name):
     [h,w,d] = blocks.shape
     canvas = np.ndarray([h, w*d], dtype = np.float32)
