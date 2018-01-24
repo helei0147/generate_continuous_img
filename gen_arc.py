@@ -33,10 +33,28 @@ def gen_arc():
             break
     
     steps = np.arange(LIGHT_NUMBER)
-    x_steps = steps*x_range/(LIGHT_NUMBER-1)
-    y_steps = steps*y_range/(LIGHT_NUMBER-1)
+    x_step = x_range/(LIGHT_NUMBER-1)
+    y_step = y_range/(LIGHT_NUMBER-1)
+    x_steps = steps*x_step
+    y_steps = steps*y_step
     x = x1+x_steps
     y = y1+y_steps
+    
+    eu_step = np.sqrt(x_step*x_step+y_step*y_step)
+    k = y_range/x_range
+    delta_x = y_step
+    delta_y = -x_step
+    
+    for i in range(LIGHT_NUMBER-2):
+        while True:
+            weight = random()*2-1
+            new_x = x[i+1]+weight*delta_x
+            new_y = y[i+1]+weight*delta_y
+            if(new_x*new_x+new_y*new_y<1):
+                x[i+1] = new_x
+                y[i+1] = new_y
+                break
+    
     z = -np.sqrt(1-x*x-y*y)
     x = np.reshape(x, [LIGHT_NUMBER, 1])
     y = np.reshape(y, [LIGHT_NUMBER, 1])
