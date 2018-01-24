@@ -3,6 +3,7 @@ import subprocess
 import numpy as np
 from scipy import misc
 import random
+import gen_arc
 
 def read_patch(model_index, material_index):
     # read mask
@@ -26,7 +27,7 @@ def read_patch(model_index, material_index):
         gs_canvas = channels[:,:,0]*0.2989 + channels[:,:,1]*0.5870 + channels[:,:,2]*0.1140
         patch_buffer[:,:,i] = gs_canvas
     count_nan(patch_buffer)
-    save_block(patch_buffer, 'temp.png')
+    # save_block(patch_buffer, 'temp.png')
     # read patch pos
     a = np.load('pos_buffer/'+str(model_index)+'.npy')
     pos_num = a.shape[0]
@@ -39,7 +40,7 @@ def read_patch(model_index, material_index):
         nonzero_pix_num = np.count_nonzero(cropped>0)
         valid_percent = np.sum(nonzero_pix_num)/(dep*w*h)
         if valid_percent>0.8:
-            save_block(cropped, str(i)+'.png')
+            # save_block(cropped, str(i)+'.png')
             block_buffer.append(cropped)
             info_buffer.append([model_index, i])
     block_buffer = np.array(block_buffer)
@@ -82,6 +83,7 @@ if __name__ == '__main__':
             #os.system(r'python gen_arc.py')
             lights = np.loadtxt('lights.txt')
             lights = np.reshape(lights, [-1, 3])
+            # gen_arc.display_lights(lights)
             [light_num,_] = lights.shape;
             command = r'BRDF_Sphere.exe %d %d'%(model_index, material_index)
             subprocess.call(command, shell=True)

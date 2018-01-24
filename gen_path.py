@@ -76,7 +76,7 @@ def key_fun():
     
 if __name__=="__main__":
     LIGHT_NUMBER = 5
-    for i in range(10000):
+    for i in range(100):
         
         lights = key_fun()
         
