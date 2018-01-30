@@ -4,7 +4,7 @@ import numpy as np
 from scipy import misc
 import random
 import gen_arc
-
+VISABLE = False
 def read_patch(model_index, material_index):
     # read mask
     mask = misc.imread('mask/%d.png'% model_index)
@@ -27,7 +27,8 @@ def read_patch(model_index, material_index):
         gs_canvas = channels[:,:,0]*0.2989 + channels[:,:,1]*0.5870 + channels[:,:,2]*0.1140
         patch_buffer[:,:,i] = gs_canvas
     count_nan(patch_buffer)
-    # save_block(patch_buffer, 'temp.png')
+    if VISABLE:
+        save_block(patch_buffer, 'temp.png')
     # read patch pos
     a = np.load('pos_buffer/'+str(model_index)+'.npy')
     pos_num = a.shape[0]
@@ -40,19 +41,24 @@ def read_patch(model_index, material_index):
         nonzero_pix_num = np.count_nonzero(cropped>0)
         valid_percent = np.sum(nonzero_pix_num)/(dep*w*h)
         if valid_percent>0.8:
-            # save_block(cropped, str(i)+'.png')
+            if VISABLE:
+                save_block(cropped, str(i)+'.png')
             block_buffer.append(cropped)
             info_buffer.append([model_index, i])
     block_buffer = np.array(block_buffer)
-    count_nan(block_buffer)
+    warning = count_nan(block_buffer)
+    if warning:
+        print('model_index:', model_index, 'material_index', material_index)
     info_buffer = np.array(info_buffer)
-    print('block_buffer shape')
-    print(block_buffer.shape)
+    #print('block_buffer shape')
+    #print(block_buffer.shape)
     return block_buffer, info_buffer
 def count_nan(matrix):
     nan_count = np.count_nonzero(np.isnan(matrix))
     if nan_count>0:
         print('nan occurs, nan count is %d'%(nan_count))
+        return True
+    return False
 def save_block(blocks, pic_name):
     [h,w,d] = blocks.shape
     canvas = np.zeros([h, w*d], dtype = np.float32)
@@ -63,27 +69,28 @@ def save_block(blocks, pic_name):
         threshold = med*5
     else:
         threshold = 0.14
-    print('threshold:', threshold)
+    #print('threshold:', threshold)
     canvas[canvas>threshold] = threshold
     canvas = canvas/threshold*255
     canvas = canvas.astype(np.uint8)
     misc.imsave(pic_name, canvas)
 
 if __name__ == '__main__':
-    for file_index in range(4):
+    for file_index in range(20,40):
         block_buffer = []
         info_buffer = []
         mat_buffer = []
         light_buffer = []
         pos_buffer = []
-        for i in range(1000):
+        for i in range(100):
             model_index = random.randint(0,9)
             material_index = random.randint(0,99)
             subprocess.call(r'python gen_arc.py', shell=True)
             #os.system(r'python gen_arc.py')
             lights = np.loadtxt('lights.txt')
             lights = np.reshape(lights, [-1, 3])
-            # gen_arc.display_lights(lights)
+            if VISABLE:
+                gen_arc.display_lights(lights)
             [light_num,_] = lights.shape;
             command = r'BRDF_Sphere.exe %d %d'%(model_index, material_index)
             subprocess.call(command, shell=True)
@@ -92,7 +99,11 @@ if __name__ == '__main__':
             block_num = block.shape[0]
             converted = np.transpose(block, [0,3,1,2])
             temp = np.concatenate(converted,axis=0)
-            print(temp.shape)
+            if temp.shape[0]%5!=0:
+                print('temp shape: ',temp.shape)
+                print('converted shape:', converted.shape)
+                print('material_index: ', material_index)
+                print('model_index: ', model_index)
             block_buffer.append(temp)
             for m in range(block_num):
                 light_buffer.append(lights)
@@ -103,14 +114,15 @@ if __name__ == '__main__':
         block_buffer = np.concatenate(block_buffer, axis=0)
         light_buffer = np.array(light_buffer)
         light_buffer = np.concatenate(light_buffer, axis=0)
+        
         mat_buffer = np.array(mat_buffer)
         info_buffer = np.array(info_buffer)
-        print(block_buffer.shape)
-        print(light_buffer.shape)
-        print(mat_buffer.shape)
-        print(info_buffer.shape)
-        np.save('results/blocks/%d.npy'%(file_index), block_buffer)
-        np.save('results/lights/%d.npy'%(file_index), light_buffer)
-        np.save('results/mats/%d.npy'%(file_index), mat_buffer)
-        np.save('results/info/%d.npy'%(file_index), info_buffer)
+        #print(block_buffer.shape)
+        #print(light_buffer.shape)
+        #print(mat_buffer.shape)
+        #print(info_buffer.shape)
+        np.save('test/blocks/%d.npy'%(file_index), block_buffer)
+        np.save('test/lights/%d.npy'%(file_index), light_buffer)
+        np.save('test/mats/%d.npy'%(file_index), mat_buffer)
+        np.save('test/info/%d.npy'%(file_index), info_buffer)
     
