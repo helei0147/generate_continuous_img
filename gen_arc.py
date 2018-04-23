@@ -129,6 +129,7 @@ def gen_jumping_arc():
     
 def output(file, lights):
     [light_num, dims] = lights.shape
+    file.write('0 0 0 ')
     for i in range(light_num):
         file.write('%f %f %f '%(lights[i, 0], lights[i, 1], lights[i, 2]))
     file.close()
@@ -143,7 +144,8 @@ def display_lights(lights, filename = 'light_timg.png'):
     plt.plot(-x,-y,m,n1,m,n2);
     plt.savefig(filename)
     
-def gen_curve():
+def gen_curve(Bezier_flag=True):
+    
     while True:
         LIGHT_NUMBER = 5
         [x1, y1, x2, y2] = gen_head_rear()
@@ -156,14 +158,17 @@ def gen_curve():
             anchor = np.array([r*np.sin(theta), r*np.cos(theta)])+center
             if curve.vec_len(anchor)<1:
                 break
-        lights = curve.gen_spiral(head, anchor, rear, LIGHT_NUMBER)
+        if Bezier_flag:
+            lights = curve.gen_Bezier(head, anchor, rear, LIGHT_NUMBER);
+        else:
+            lights = curve.gen_spiral(head, anchor, rear, LIGHT_NUMBER)
         if lights.shape[1]!=1:
             break
     return lights
         
     
 if __name__ == "__main__":
-    lights = gen_curve()
+    lights = gen_curve(False)
     #display_lights(lights)
     f = open('lights.txt','w')
     output(f, lights)

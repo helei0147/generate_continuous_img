@@ -76,7 +76,8 @@ def save_block(blocks, pic_name):
     misc.imsave(pic_name, canvas)
 
 if __name__ == '__main__':
-    for file_index in range(20,40):
+    file_count = 20
+    for file_index in range(file_count, 40):
         block_buffer = []
         info_buffer = []
         mat_buffer = []
@@ -117,10 +118,10 @@ if __name__ == '__main__':
         
         mat_buffer = np.array(mat_buffer)
         info_buffer = np.array(info_buffer)
-        #print(block_buffer.shape)
-        #print(light_buffer.shape)
-        #print(mat_buffer.shape)
-        #print(info_buffer.shape)
+        print(block_buffer.shape)
+        print(light_buffer.shape)
+        print(mat_buffer.shape)
+        print(info_buffer.shape)
         np.save('test/blocks/%d.npy'%(file_index), block_buffer)
         np.save('test/lights/%d.npy'%(file_index), light_buffer)
         np.save('test/mats/%d.npy'%(file_index), mat_buffer)

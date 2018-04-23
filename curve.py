@@ -57,10 +57,10 @@ def gen_spiral(head, center, rear, density):
         insert_buffer.append(p)
     available = True
     for vec in insert_buffer:
-        if vec_len>=1:
+        if vec_len(vec)>=1:
             available = False
     if available == False: # 如果给定的三个锚点不能够生成有效的光照， 返回一个大小为1x1的零矩阵
-        return np.zero([1,1])
+        return np.zeros([1,1])
     insert_buffer = np.array(insert_buffer)
     insert_buffer = from_2_to_3(insert_buffer)
     return insert_buffer
@@ -70,5 +70,6 @@ if __name__ == '__main__':
     p2 = np.array([0.5, 0.5])
     anchor = np.array([-1, 1])
     lights = gen_spiral(p1, p2, anchor, 5);
-    #dis_lights(lights)
+    print(lights.shape)
+    dis_lights(lights)
     
